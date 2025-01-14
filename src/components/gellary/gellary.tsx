@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import GellaryCard from './Card';
 import { GellaryImges } from '@/lib/data';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -8,15 +8,35 @@ import { CatagoryType, ImageTyepe } from '@/type';
 
 const Gellary = () => {
   const [galleryimages, setEmages] = useState<ImageTyepe[]>([]);
+  const [client, setClient] = useState(false); // Flag to handle client-side rendering
 
   const router = useRouter();
   const params = useSearchParams();
-  const search = params.get('search');
-  const catagory = params.get('catagory');
-  const popup = params.get('popup') ? true : false;
+  const [search, setSearch] = useState<string | null>(null);
+  const [catagory, setCatagory] = useState<string | null>(null);
+  const [popup, setPopup] = useState(false);
+
   const colse = () => {
     router.push('/');
   };
+
+  // Set client flag to true after initial render
+  useEffect(() => {
+    setClient(true);
+  }, []);
+
+  // Handle search and category from query params once the component is mounted
+  useEffect(() => {
+    if (client) {
+      const searchParam = params.get('search');
+      const categoryParam = params.get('catagory');
+      const popupParam = params.get('popup') ? true : false;
+
+      setSearch(searchParam);
+      setCatagory(categoryParam);
+      setPopup(popupParam);
+    }
+  }, [client, params]);
 
   useEffect(() => {
     const storedImages = localStorage.getItem('galleryImages');
@@ -69,6 +89,11 @@ const Gellary = () => {
       setEmages((pre) => [...pre, newImage]);
     }
   };
+
+  if (!client) {
+    // Return a loading screen or something to show until client-side code runs
+    return <div>Loading...</div>;
+  }
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
