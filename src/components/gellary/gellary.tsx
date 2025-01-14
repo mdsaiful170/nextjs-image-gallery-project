@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import GellaryCard from './Card';
 import { GellaryImges } from '@/lib/data';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -17,6 +17,13 @@ const Gellary = () => {
   const colse = () => {
     router.push('/');
   };
+
+  useEffect(() => {
+    const storedImages = localStorage.getItem('galleryImages');
+    if (storedImages) {
+      setEmages(JSON.parse(storedImages)); // Load images from localStorage
+    }
+  }, []);
 
   useEffect(() => {
     const filterData = GellaryImges.filter(
@@ -64,19 +71,18 @@ const Gellary = () => {
   };
 
   return (
-    <>
-      <section className="grid  place-content-center place-items-center gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3  2xl:grid-cols-4">
+    <Suspense fallback={<div>Loading...</div>}>
+      <section className="grid place-content-center place-items-center gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
         {popup && <Popup submit={addNewImage} close={colse} />}
-
         {galleryimages?.length > 0 ? (
           galleryimages.map((img) => <GellaryCard key={img.id} {...img} />)
         ) : (
-          <p className="text-center col-span-4 mt-5  text-xl font-bold capitalize text-red-300 ">
+          <p className="text-center col-span-4 mt-5 text-xl font-bold capitalize text-red-300">
             Data not found
           </p>
         )}
       </section>
-    </>
+    </Suspense>
   );
 };
 
